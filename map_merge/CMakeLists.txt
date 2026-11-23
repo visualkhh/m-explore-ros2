@@ -98,8 +98,19 @@ target_link_libraries(combine_grids ${rclcpp_LIBRARIES} ${OpenCV_LIBS})
 target_link_libraries(map_merge combine_grids)
 # target_link_libraries(map_merge)
 
-ament_target_dependencies(map_merge ${DEPENDENCIES})
-ament_target_dependencies(combine_grids ${DEPENDENCIES})
+# ament_target_dependencies() was removed from ament_cmake 2.8.5+ (Lyrical).
+# Expand the same dependency targets explicitly with modern CMake instead.
+set(MODERN_DEPENDENCIES "")
+foreach(_dep ${DEPENDENCIES})
+  if(_dep STREQUAL "OpenCV")
+    list(APPEND MODERN_DEPENDENCIES ${OpenCV_LIBS})
+  else()
+    list(APPEND MODERN_DEPENDENCIES ${${_dep}_TARGETS})
+  endif()
+endforeach()
+
+target_link_libraries(map_merge ${MODERN_DEPENDENCIES})
+target_link_libraries(combine_grids ${MODERN_DEPENDENCIES})
 
 install(
   TARGETS combine_grids
